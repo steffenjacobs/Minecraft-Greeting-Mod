@@ -20,7 +20,9 @@ public class GreetingMod {
     private static final Logger LOGGER = LogManager.getLogger();
     private static final List<String> GREETINGS = Arrays.asList("Hallo %s", "Hi %s", "Hii %s", "Hellu %s", "Hi %s :)"
             , "Hiii %s :)", "Hallo %s :)", "Hoi %s", "hoi %s");
-    private static final List<String> GOODBYE = Arrays.asList("bb", "ciao", "bin weg", "bin schlafen", "gn", "cya",
+    private static final List<String> GOODBYE = Arrays.asList("bis dann", "wiedersehen", "auf wiedersehen", "bye",
+            "byebye", "goodbye", "tschuß", "tschus", "bb",
+            "ciao", "tschüss", "bis später", "gn", "cya",
             "bis dann :)");
     private static final int GODDBYE_COOLDOWN_SECONDS = 45;
 

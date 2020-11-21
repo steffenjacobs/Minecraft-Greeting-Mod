@@ -3,6 +3,8 @@
 This mod attempts to greet players when they connect based on the received chat message.
 In addition, players are said goodbye if they hint at leaving.
 
+![Demo](./demo.gif)
+
 ## Limitations
 
 - Custom chat formats are not fully supported.

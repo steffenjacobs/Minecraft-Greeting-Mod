@@ -1,56 +1,69 @@
 package me.steffenjacobs.greetingmod;
 
+import me.steffenjacobs.greetingmod.config.ConfigManager;
+import me.steffenjacobs.greetingmod.config.GreetingConfiguration;
+import me.steffenjacobs.greetingmod.util.LruCache;
+import me.steffenjacobs.greetingmod.util.MessageSenderUtil;
 import net.minecraft.client.Minecraft;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+
+import static me.steffenjacobs.greetingmod.util.MessageSenderUtil.sendRandomMessageForPlayer;
 
 @Mod(value = "greetingmod")
 @Mod.EventBusSubscriber(value = Dist.CLIENT)
 public class GreetingMod {
-    private static final List<String> GREETINGS = Arrays.asList("Huhu %s, Hallo %s", "Hi %s", "Hii %s", "Hellu %s",
-            "Hi %s :)", "Hiii %s :)", "Hallo %s :)", "Hoi %");
-    private static final List<String> GOODBYE = Arrays.asList("Bis dann", "Wiedersehen", "Auf Wiedersehen", "Bye",
-            "Byebye", "Goodbye", "Tschuß", "Tschus", "BB",
-            "Ciao", "Tschüss", "Bis später", "GN", "Cya",
-            "Bis dann :)");
-    private static final int GODDBYE_COOLDOWN_SECONDS = 45;
-    private final Random random = new Random();
 
-    LocalDateTime lastGoodbye = LocalDateTime.now().minusHours(1);
+    private static final LruCache<String, LocalDateTime> USER_LEFT_CACHE = new LruCache<>(16);
+
+    private final GreetingConfiguration configuration;
+    private LocalDateTime lastGoodbye = LocalDateTime.now().minusHours(1);
 
     public GreetingMod() {
         MinecraftForge.EVENT_BUS.register(this);
+        configuration = new ConfigManager().load();
+    }
+
+
+    @SubscribeEvent
+    public void onPlayerJoin(EntityJoinWorldEvent event) {
+        if (event.getEntity() instanceof PlayerEntity && event.getEntity() == Minecraft.getInstance().player) {
+            MessageSenderUtil.sendLocalMessage("[GREETING MOD]: Greeting Mod is active.");
+        }
     }
 
     @SubscribeEvent
     public void chatMessageReceived(ClientChatReceivedEvent event) {
         if (!Minecraft.getInstance().player.getUniqueID().equals(event.getSenderUUID())) {
-            ChatMessage message = ChatMessageTokenizer.tokenizeChatMessage(event.getMessage().getString());
-            if (message.getMessageType() == ChatMessage.MessageType.CHAT && isNotSentByCurrentPlayer(message) && LocalDateTime.now().isAfter(lastGoodbye.plusSeconds(GODDBYE_COOLDOWN_SECONDS))) {
-                if (GOODBYE.contains(message.getMessage().toLowerCase())) {
-                    sendRandomMessageForPlayer(GOODBYE, message.getPlayerName());
+            ChatMessage message = ChatMessageTokenizer.tokenizeChatMessage(event.getMessage().getString(), configuration);
+            if (message.getMessageType() == ChatMessage.MessageType.CHAT && isNotSentByCurrentPlayer(message) && LocalDateTime.now().isAfter(lastGoodbye.plusSeconds(configuration.getGoodbyeCooldownSeconds()))) {
+                if (configuration.getGoodbyes().contains(message.getMessage().toLowerCase())) {
+                    sendRandomMessageForPlayer(configuration.getGoodbyes(), message.getPlayerName());
                     lastGoodbye = LocalDateTime.now();
                 }
             } else if (message.getMessageType() == ChatMessage.MessageType.JOIN && isNotSentByCurrentPlayer(message)) {
-                sendRandomMessageForPlayer(GREETINGS, message.getPlayerName());
+                handleJoinMessage(message);
+            } else if (message.getMessageType() == ChatMessage.MessageType.LEAVE && isNotSentByCurrentPlayer(message)) {
+                USER_LEFT_CACHE.put(message.getPlayerName(), LocalDateTime.now());
             }
         }
+
     }
 
-    private void sendRandomMessageForPlayer(List<String> messages, String playerName) {
-        String template = messages.get(random.nextInt(messages.size()));
-        if (random.nextBoolean()) {
-            template = template.toLowerCase();
+    private void handleJoinMessage(ChatMessage message) {
+        LocalDateTime leaveTime = USER_LEFT_CACHE.remove(message.getPlayerName());
+        if (leaveTime == null || leaveTime.isBefore(LocalDateTime.now().minusSeconds(configuration.getReconnectCooldownSeconds()))) {
+            sendRandomMessageForPlayer(configuration.getGreetings(), message.getPlayerName());
+        } else if (leaveTime.isBefore(LocalDateTime.now().minusSeconds(configuration.getReconnectWelcomeBackCooldownSeconds()))) {
+            sendRandomMessageForPlayer(configuration.getWelcomeBacks(), message.getPlayerName());
         }
-        Minecraft.getInstance().player.sendChatMessage(String.format(template, random.nextBoolean() ? playerName : ""));
     }
 
     private boolean isNotSentByCurrentPlayer(ChatMessage message) {

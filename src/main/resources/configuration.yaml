@@ -1,0 +1,52 @@
+goodbye:
+  cooldown:
+    seconds: 45
+  messages:
+    - "Bis dann"
+    - Wiedersehen
+    - "Auf Wiedersehen"
+    - Bye
+    - Byebye
+    - Goodbye
+    - Tschuß
+    - Tschus
+    - BB
+    - Ciao
+    - Tschüss
+    - "Bis später"
+    - GN
+    - Cya
+greeting:
+  messages:
+    - "Huhu %s"
+    - "Hi %s"
+    - "Hii %s"
+    - "Hiii %s"
+    - "Hallo %s"
+    - "Hellu %s"
+    - "Hoi %"
+    - "Hey %s"
+    - "Tach %s"
+  emoticons:
+    - ":)"
+    - ":D"
+    - "(:"
+    - "^_^"
+reconnect:
+  cooldown:
+    seconds: 300
+    welcomeback_seconds: 20
+  messages:
+    - "Welcome back %s"
+    - "WB %s"
+    - "Willkommen zurück %s"
+pattern:
+  chat:
+    - "<(.*)> (.*)"
+    - "\\[.*\\] (.*) .*> (.*)"
+  join:
+    - "(.*) joined the game"
+    - "\\[.*\\] (.*) .*> (.*)"
+  leave:
+    - "(.*) left the game"
+    - "\\[\\-\\] (.*)"

@@ -7,5 +7,5 @@ In addition, players are said goodbye if they hint at leaving.
 
 ## Limitations
 
-- Custom chat formats are not fully supported.
+- Custom chat formats are not fully supported yet.
 - Custom login messages might not be detected as a login message.

@@ -1,14 +1,13 @@
 package me.steffenjacobs.greetingmod;
 
 import lombok.experimental.UtilityClass;
-import net.minecraft.client.Minecraft;
-import net.minecraft.util.text.StringTextComponent;
+import me.steffenjacobs.greetingmod.config.GreetingConfiguration;
+import me.steffenjacobs.greetingmod.util.MessageSenderUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -16,28 +15,27 @@ import java.util.regex.Pattern;
 public class ChatMessageTokenizer {
 
     private static final Logger LOGGER = LogManager.getLogger();
-    private static final List<Pattern> MESSAGE_CHAT_PATTERNS = Arrays.asList(Pattern.compile("<(.*)> (.*)"),
-            Pattern.compile("\\[.*\\] (.*) .*> (.*)"));
-    private static final List<Pattern> MESSAGE_JOIN_PATTERNS = Arrays.asList(Pattern.compile("(.*) joined the game"),
-            Pattern.compile("\\[\\+\\] (.*)"));
-    static final UUID SERVER_UUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
 
-    public static ChatMessage tokenizeChatMessage(String fullLine) {
-        for (Pattern pattern : MESSAGE_CHAT_PATTERNS) {
-            Matcher matcher = pattern.matcher(fullLine);
-            if (matcher.find()) {
-                return ChatMessage.builder().playerName(matcher.group(1)).message(matcher.group(2)).messageType(ChatMessage.MessageType.CHAT).build();
-            }
-        }
-        for (Pattern pattern : MESSAGE_JOIN_PATTERNS) {
-            Matcher matcher = pattern.matcher(fullLine);
-            if (matcher.find()) {
-                return ChatMessage.builder().playerName(matcher.group(1)).messageType(ChatMessage.MessageType.JOIN).build();
-            }
-        }
+    public static ChatMessage tokenizeChatMessage(String fullLine, GreetingConfiguration config) {
+        return match(fullLine, config.getChatPattern(), ChatMessage.MessageType.CHAT).orElseGet(() ->
+                match(fullLine, config.getJoinPattern(), ChatMessage.MessageType.JOIN).orElseGet(() ->
+                        match(fullLine, config.getLeavePattern(), ChatMessage.MessageType.LEAVE).orElseGet(() -> createErrorMessage(fullLine))));
+    }
+
+    private static ChatMessage createErrorMessage(String fullLine) {
         LOGGER.warn("Could not parse incoming chat message: '{}'", fullLine);
-        Minecraft.getInstance().player.sendMessage(new StringTextComponent("[GREETING MOD]: Could not " +
-                "parse incoming chat message: '" + fullLine + "'"), SERVER_UUID);
+        MessageSenderUtil.sendLocalMessage(String.format("[GREETING MOD]: Could not parse incoming chat message: '%s'"
+                , fullLine));
         return ChatMessage.builder().playerName("").message(fullLine).build();
+    }
+
+    private Optional<ChatMessage> match(String fullLine, List<Pattern> patterns, ChatMessage.MessageType messageType) {
+        for (Pattern pattern : patterns) {
+            Matcher matcher = pattern.matcher(fullLine);
+            if (matcher.find()) {
+                return Optional.of(ChatMessage.builder().playerName(matcher.group(1)).message(fullLine).messageType(messageType).build());
+            }
+        }
+        return Optional.empty();
     }
 }

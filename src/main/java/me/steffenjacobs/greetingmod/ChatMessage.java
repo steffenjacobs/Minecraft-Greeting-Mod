@@ -8,8 +8,8 @@ import lombok.Value;
 @Builder
 public class ChatMessage {
 
-    enum MessageType{
-        JOIN, CHAT
+    public enum MessageType{
+        JOIN, CHAT, LEAVE
     }
 
     String playerName;

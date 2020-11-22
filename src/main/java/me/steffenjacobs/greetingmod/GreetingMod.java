@@ -18,12 +18,12 @@ import java.util.Random;
 @Mod.EventBusSubscriber(value = Dist.CLIENT)
 public class GreetingMod {
     private static final Logger LOGGER = LogManager.getLogger();
-    private static final List<String> GREETINGS = Arrays.asList("Hallo %s", "Hi %s", "Hii %s", "Hellu %s", "Hi %s :)"
-            , "Hiii %s :)", "Hallo %s :)", "Hoi %s", "hoi %s");
-    private static final List<String> GOODBYE = Arrays.asList("bis dann", "wiedersehen", "auf wiedersehen", "bye",
-            "byebye", "goodbye", "tschuß", "tschus", "bb",
-            "ciao", "tschüss", "bis später", "gn", "cya",
-            "bis dann :)");
+    private static final List<String> GREETINGS = Arrays.asList("Huhu %s, Hallo %s", "Hi %s", "Hii %s", "Hellu %s",
+            "Hi %s :)", "Hiii %s :)", "Hallo %s :)", "Hoi %");
+    private static final List<String> GOODBYE = Arrays.asList("Bis dann", "Wiedersehen", "Auf Wiedersehen", "Bye",
+            "Byebye", "Goodbye", "Tschuß", "Tschus", "BB",
+            "Ciao", "Tschüss", "Bis später", "GN", "Cya",
+            "Bis dann :)");
     private static final int GODDBYE_COOLDOWN_SECONDS = 45;
 
     LocalDateTime lastGoodbye = LocalDateTime.now().minusHours(1);
@@ -48,7 +48,12 @@ public class GreetingMod {
     }
 
     private void sendRandomMessageForPlayer(List<String> messages, String playerName) {
-        Minecraft.getInstance().player.sendChatMessage(String.format(messages.get(new Random().nextInt(messages.size())), playerName));
+        Random random = new Random();
+        String template = messages.get(random.nextInt(messages.size()));
+        if (random.nextBoolean()) {
+            template = template.toLowerCase();
+        }
+        Minecraft.getInstance().player.sendChatMessage(String.format(template, random.nextBoolean() ? playerName : ""));
     }
 
     private boolean isNotSentByCurrentPlayer(ChatMessage message) {

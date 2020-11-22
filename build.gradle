@@ -68,29 +68,39 @@ repositories {
     mavenCentral()
 }
 
+configurations {
+    // configuration that holds jars to include in the jar
+    extraLibs
+}
+
 dependencies {
     minecraft 'net.minecraftforge:forge:1.16.3-34.1.42'
 
-    compile 'org.yaml:snakeyaml:1.27'
+    extraLibs 'org.yaml:snakeyaml:1.27'
     compileOnly 'org.projectlombok:lombok:1.18.16'
     annotationProcessor 'org.projectlombok:lombok:1.18.16'
 
     testCompileOnly 'org.projectlombok:lombok:1.18.16'
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.16'
+    configurations.compile.extendsFrom(configurations.extraLibs)
 }
 
 jar {
     manifest {
         attributes([
-                "Specification-Title": "greetingmod",
-                "Specification-Vendor": "Steffen Jacobs",
-                "Specification-Version": "1.1.0",
-                "Implementation-Title": project.name,
-                "Implementation-Version": "${version}",
-                "Implementation-Vendor" :"Steffen Jacobs",
+                "Specification-Title"     : "greetingmod",
+                "Specification-Vendor"    : "Steffen Jacobs",
+                "Specification-Version"   : "1.1.0",
+                "Implementation-Title"    : project.name,
+                "Implementation-Version"  : "${version}",
+                "Implementation-Vendor"   : "Steffen Jacobs",
                 "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
         ])
     }
+    from {
+        configurations.extraLibs.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+
 }
 
 jar.finalizedBy('reobfJar')

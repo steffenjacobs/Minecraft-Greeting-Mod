@@ -19,6 +19,7 @@ public class ConfigManager {
         config = GreetingConfiguration.builder()
                 .goodbyeCooldownSeconds((Integer) getPathThree("goodbye.cooldown.seconds", map))
                 .goodbyes((List<String>) getPathTwo("goodbye.messages", map))
+                .goodbyesLowerCase(((List<String>) getPathTwo("goodbye.messages", map)).stream().map(String::toLowerCase).collect(Collectors.toList()))
                 .greetings((List<String>) getPathTwo("greeting.messages", map))
                 .greetingsEmoticons((List<String>) getPathTwo("greeting.emoticons", map))
                 .reconnectCooldownSeconds((Integer) getPathThree("reconnect.cooldown.seconds", map))

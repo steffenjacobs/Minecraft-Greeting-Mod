@@ -42,9 +42,10 @@ public class GreetingMod {
     @SubscribeEvent
     public void chatMessageReceived(ClientChatReceivedEvent event) {
         if (!Minecraft.getInstance().player.getUniqueID().equals(event.getSenderUUID())) {
-            ChatMessage message = ChatMessageTokenizer.tokenizeChatMessage(event.getMessage().getString(), configuration);
+            ChatMessage message = ChatMessageTokenizer.tokenizeChatMessage(event.getMessage().getString(),
+                    configuration);
             if (message.getMessageType() == ChatMessage.MessageType.CHAT && isNotSentByCurrentPlayer(message) && LocalDateTime.now().isAfter(lastGoodbye.plusSeconds(configuration.getGoodbyeCooldownSeconds()))) {
-                if (configuration.getGoodbyes().contains(message.getMessage().toLowerCase())) {
+                if (configuration.getGoodbyesLowerCase().contains(message.getMessage().toLowerCase())) {
                     sendRandomMessageForPlayer(configuration.getGoodbyes(), message.getPlayerName());
                     lastGoodbye = LocalDateTime.now();
                 }
@@ -52,6 +53,13 @@ public class GreetingMod {
                 handleJoinMessage(message);
             } else if (message.getMessageType() == ChatMessage.MessageType.LEAVE && isNotSentByCurrentPlayer(message)) {
                 USER_LEFT_CACHE.put(message.getPlayerName(), LocalDateTime.now());
+            }
+        } else {
+            //Check if current player said goodbye -> Avoid second message on answers from other players
+            ChatMessage message = ChatMessageTokenizer.tokenizeChatMessage(event.getMessage().getString(),
+                    configuration);
+            if (configuration.getGoodbyesLowerCase().contains(message.getMessage().toLowerCase())) {
+                lastGoodbye = LocalDateTime.now();
             }
         }
 

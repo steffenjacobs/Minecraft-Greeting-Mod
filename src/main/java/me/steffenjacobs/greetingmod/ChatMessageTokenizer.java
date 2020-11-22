@@ -33,7 +33,7 @@ public class ChatMessageTokenizer {
         for (Pattern pattern : patterns) {
             Matcher matcher = pattern.matcher(fullLine);
             if (matcher.find()) {
-                return Optional.of(ChatMessage.builder().playerName(matcher.group(1)).message(fullLine).messageType(messageType).build());
+                return Optional.of(ChatMessage.builder().playerName(matcher.group(1)).message(matcher.group(2)).messageType(messageType).build());
             }
         }
         return Optional.empty();

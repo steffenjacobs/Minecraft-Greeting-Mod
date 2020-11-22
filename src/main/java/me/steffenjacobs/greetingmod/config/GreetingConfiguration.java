@@ -12,6 +12,7 @@ public class GreetingConfiguration {
     List<String> goodbyes;
     List<String> greetings;
     List<String> welcomeBacks;
+    List<String> goodbyesLowerCase;
     List<String> greetingsEmoticons;
 
     int goodbyeCooldownSeconds;

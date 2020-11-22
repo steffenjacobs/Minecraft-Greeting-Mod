@@ -13,7 +13,7 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
-version = '1.1.0'
+version = '1.1.1'
 group = 'me.steffenjacobs.greetingmod' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'greeting'
 
@@ -90,7 +90,7 @@ jar {
         attributes([
                 "Specification-Title"     : "greetingmod",
                 "Specification-Vendor"    : "Steffen Jacobs",
-                "Specification-Version"   : "1.1.0",
+                "Specification-Version"   : "1.1.1",
                 "Implementation-Title"    : project.name,
                 "Implementation-Version"  : "${version}",
                 "Implementation-Vendor"   : "Steffen Jacobs",

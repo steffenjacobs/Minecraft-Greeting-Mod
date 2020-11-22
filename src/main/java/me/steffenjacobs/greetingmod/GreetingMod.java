@@ -6,8 +6,6 @@ import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -17,7 +15,6 @@ import java.util.Random;
 @Mod(value = "greetingmod")
 @Mod.EventBusSubscriber(value = Dist.CLIENT)
 public class GreetingMod {
-    private static final Logger LOGGER = LogManager.getLogger();
     private static final List<String> GREETINGS = Arrays.asList("Huhu %s, Hallo %s", "Hi %s", "Hii %s", "Hellu %s",
             "Hi %s :)", "Hiii %s :)", "Hallo %s :)", "Hoi %");
     private static final List<String> GOODBYE = Arrays.asList("Bis dann", "Wiedersehen", "Auf Wiedersehen", "Bye",
@@ -25,6 +22,7 @@ public class GreetingMod {
             "Ciao", "Tschüss", "Bis später", "GN", "Cya",
             "Bis dann :)");
     private static final int GODDBYE_COOLDOWN_SECONDS = 45;
+    private final Random random = new Random();
 
     LocalDateTime lastGoodbye = LocalDateTime.now().minusHours(1);
 
@@ -48,7 +46,6 @@ public class GreetingMod {
     }
 
     private void sendRandomMessageForPlayer(List<String> messages, String playerName) {
-        Random random = new Random();
         String template = messages.get(random.nextInt(messages.size()));
         if (random.nextBoolean()) {
             template = template.toLowerCase();

@@ -2,7 +2,6 @@ package me.steffenjacobs.greetingmod;
 
 import lombok.experimental.UtilityClass;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.Entity;
 import net.minecraft.util.text.StringTextComponent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -37,7 +36,7 @@ public class ChatMessageTokenizer {
             }
         }
         LOGGER.warn("Could not parse incoming chat message: '{}'", fullLine);
-        ((Entity) Minecraft.getInstance().player).sendMessage(new StringTextComponent("[GREETING MOD]: Could not " +
+        Minecraft.getInstance().player.sendMessage(new StringTextComponent("[GREETING MOD]: Could not " +
                 "parse incoming chat message: '" + fullLine + "'"), SERVER_UUID);
         return ChatMessage.builder().playerName("").message(fullLine).build();
     }

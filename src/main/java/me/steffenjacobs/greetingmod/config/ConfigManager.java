@@ -29,6 +29,7 @@ public class ConfigManager {
                 .chatPattern(createPatterns(getPathTwo("pattern.chat", map)))
                 .joinPattern(createPatterns(getPathTwo("pattern.join", map)))
                 .leavePattern(createPatterns(getPathTwo("pattern.leave", map)))
+                .showErrors((Boolean)map.get("show-errors"))
                 .build();
 
         return config;

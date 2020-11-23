@@ -9,6 +9,8 @@ import java.util.regex.Pattern;
 @Value
 @Builder
 public class GreetingConfiguration {
+    boolean showErrors;
+
     List<String> goodbyes;
     List<String> greetings;
     List<String> welcomeBacks;

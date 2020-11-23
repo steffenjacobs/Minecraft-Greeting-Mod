@@ -19,13 +19,15 @@ public class ChatMessageTokenizer {
     public static ChatMessage tokenizeChatMessage(String fullLine, GreetingConfiguration config) {
         return match(fullLine, config.getChatPattern(), ChatMessage.MessageType.CHAT).orElseGet(() ->
                 match(fullLine, config.getJoinPattern(), ChatMessage.MessageType.JOIN).orElseGet(() ->
-                        match(fullLine, config.getLeavePattern(), ChatMessage.MessageType.LEAVE).orElseGet(() -> createErrorMessage(fullLine))));
+                        match(fullLine, config.getLeavePattern(), ChatMessage.MessageType.LEAVE).orElseGet(() -> createErrorMessage(fullLine, config))));
     }
 
-    private static ChatMessage createErrorMessage(String fullLine) {
+    private static ChatMessage createErrorMessage(String fullLine, GreetingConfiguration configuration) {
         LOGGER.warn("Could not parse incoming chat message: '{}'", fullLine);
-        MessageSenderUtil.sendLocalMessage(String.format("[GREETING MOD]: Could not parse incoming chat message: '%s'"
-                , fullLine));
+        if (configuration.isShowErrors()) {
+            MessageSenderUtil.sendLocalMessage(String.format("[GREETING MOD]: Could not parse incoming chat message: " +
+                    "'%s'", fullLine));
+        }
         return ChatMessage.builder().playerName("").message(fullLine).build();
     }
 

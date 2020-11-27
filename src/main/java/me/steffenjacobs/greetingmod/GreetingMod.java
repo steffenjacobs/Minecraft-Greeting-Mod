@@ -4,11 +4,13 @@ import me.steffenjacobs.greetingmod.config.ConfigManager;
 import me.steffenjacobs.greetingmod.config.GreetingConfiguration;
 import me.steffenjacobs.greetingmod.util.LruCache;
 import me.steffenjacobs.greetingmod.util.MessageSenderUtil;
+import me.steffenjacobs.greetingmod.util.Scheduler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ClientChatReceivedEvent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -29,6 +31,11 @@ public class GreetingMod {
     public GreetingMod() {
         MinecraftForge.EVENT_BUS.register(this);
         configuration = new ConfigManager().load();
+    }
+
+    @SubscribeEvent
+    public void onTick(TickEvent.ClientTickEvent event){
+        Scheduler.instance().tick();
     }
 
 

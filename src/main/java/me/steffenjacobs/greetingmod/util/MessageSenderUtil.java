@@ -16,6 +16,9 @@ public class MessageSenderUtil {
 
     private final Random random = new Random();
     private static final String MESSAGE_FORMAT = "%s %s";
+    public static final int CHAT_DELAY_MINIMUM_TICKS = 15;
+    public static final int CHAT_DELAY_MESSAGE_LENGTH_MULTIPLICATOR = 5;
+    public static final int CHAT_DELAY_RANDOM_TICK_MAX = 35;
 
     public static void sendLocalMessage(String msg) {
         Minecraft.getInstance().player.sendMessage(new StringTextComponent(msg), EMPTY_UUID);
@@ -39,7 +42,8 @@ public class MessageSenderUtil {
         //use suffix (randomly)
         String fullMessage = realizeFormatRandomly(innerMessage, getRandomFromList(suffixes), MESSAGE_FORMAT);
 
-        Minecraft.getInstance().player.sendChatMessage(fullMessage);
+        Scheduler.instance().schedule(() -> Minecraft.getInstance().player.sendChatMessage(fullMessage),
+                CHAT_DELAY_MINIMUM_TICKS + fullMessage.length() * CHAT_DELAY_MESSAGE_LENGTH_MULTIPLICATOR + random.nextInt(CHAT_DELAY_RANDOM_TICK_MAX));
     }
 
     private static String getRandomFromList(List<String> suffixes) {

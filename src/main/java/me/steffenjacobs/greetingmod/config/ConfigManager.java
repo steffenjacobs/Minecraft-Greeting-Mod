@@ -12,8 +12,9 @@ public class ConfigManager {
 
     private GreetingConfiguration config;
 
+    @SuppressWarnings("unchecked")
     public GreetingConfiguration load() {
-        InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("configuration.yaml");
+        InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("configuration-greeting.yaml");
         Map<String, Object> map = new Yaml().load(inputStream);
 
         config = GreetingConfiguration.builder()
@@ -35,11 +36,13 @@ public class ConfigManager {
         return config;
     }
 
+    @SuppressWarnings("unchecked")
     private Object getPathTwo(String path, Map<String, Object> map) {
         String[] keys = path.split("\\.");
         return ((Map<String, Object>) map.get(keys[0])).get(keys[1]);
     }
 
+    @SuppressWarnings("unchecked")
     private Object getPathThree(String path, Map<String, Object> map) {
         String[] keys = path.split("\\.");
         return ((Map<String, Object>) ((Map<String, Object>) map.get(keys[0])).get(keys[1])).get(keys[2]);
@@ -52,6 +55,7 @@ public class ConfigManager {
         return config;
     }
 
+    @SuppressWarnings("unchecked")
     private List<Pattern> createPatterns(Object list) {
         return ((List<String>) list).stream().map(Pattern::compile).collect(Collectors.toList());
     }

@@ -4,13 +4,13 @@ license="MIT License"
 # A URL to refer people to when problems occur with this mod
 issueTrackerURL="http://my.issue.tracker/" #optional
 # A list of mods - how many allowed here is determined by the individual mod loader
+logoFile="greeting.png" #optional
 [[mods]] #mandatory
 modId="greetingmod" #mandatory
 version="${file.jarVersion}" #mandatory
 displayName="Greeting Mod" #mandatory
 # updateJSONURL="http://myurl.me/" #optional
 displayURL="https://github.com/steffenjacobs/greeting-mod" #optional
-logoFile="greeting.png" #optional
 authors="Steffen Jacobs" #optional
 description='''
 This mod automatically greets players when they join and says goodbye when they say that they will leave.

@@ -16,7 +16,7 @@ public class MessageSenderUtil {
 
     private final Random random = new Random();
     private static final String MESSAGE_FORMAT = "%s %s";
-    public static final int CHAT_DELAY_MINIMUM_TICKS = 15;
+    public static final int CHAT_DELAY_MINIMUM_TICKS = 55;
     public static final int CHAT_DELAY_MESSAGE_LENGTH_MULTIPLICATOR = 5;
     public static final int CHAT_DELAY_RANDOM_TICK_MAX = 35;
 

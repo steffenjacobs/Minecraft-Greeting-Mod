@@ -9,12 +9,15 @@ goodbye:
     - Byebye
     - Goodbye
     - Tschuß
+    - Tschuuuuß
     - Tschus
+    - Tschuuuuus
     - BB
     - Ciao
     - Tschüss
     - GN
     - Cya
+    - Mach's gut!
 greeting:
   messages:
     - "Huhu %s"
@@ -25,7 +28,12 @@ greeting:
     - "Hellu %s"
     - "Hoi %s"
     - "Hey %s"
+    - "Heyy %s"
+    - "Heyyy %s"
     - "Tach %s"
+    - "Tachchen %s"
+    - "Moin %s"
+    - "Moinsen %s"
   emoticons:
     - ":)"
     - ":D"

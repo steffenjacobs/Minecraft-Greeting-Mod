@@ -17,6 +17,9 @@ public class ConfigManager {
         InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("configuration-greeting.yaml");
         Map<String, Object> map = new Yaml().load(inputStream);
 
+        List<String> welcomes = (List<String>) getPathTwo("welcome.messages", map);
+        welcomes.addAll((List<String>) getPathTwo("greeting.messages", map));
+
         config = GreetingConfiguration.builder()
                 .goodbyeCooldownSeconds((Integer) getPathThree("goodbye.cooldown.seconds", map))
                 .goodbyes((List<String>) getPathTwo("goodbye.messages", map))
@@ -24,13 +27,15 @@ public class ConfigManager {
                 .greetings((List<String>) getPathTwo("greeting.messages", map))
                 .greetingsEmoticons((List<String>) getPathTwo("greeting.emoticons", map))
                 .reconnectCooldownSeconds((Integer) getPathThree("reconnect.cooldown.seconds", map))
+                .welcomes(welcomes)
                 .reconnectWelcomeBackCooldownSeconds((Integer) getPathThree("reconnect.cooldown.welcomeback_seconds",
                         map))
                 .welcomeBacks((List<String>) getPathTwo("reconnect.messages", map))
                 .chatPattern(createPatterns(getPathTwo("pattern.chat", map)))
                 .joinPattern(createPatterns(getPathTwo("pattern.join", map)))
                 .leavePattern(createPatterns(getPathTwo("pattern.leave", map)))
-                .showErrors((Boolean)map.get("show-errors"))
+                .welcomePattern(createPatterns(getPathTwo("pattern.welcome", map)))
+                .showErrors((Boolean) map.get("show-errors"))
                 .build();
 
         return config;

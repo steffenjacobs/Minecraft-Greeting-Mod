@@ -16,6 +16,7 @@ public class GreetingConfiguration {
     List<String> welcomeBacks;
     List<String> goodbyesLowerCase;
     List<String> greetingsEmoticons;
+    List<String> welcomes;
 
     int goodbyeCooldownSeconds;
     int reconnectCooldownSeconds;
@@ -24,4 +25,5 @@ public class GreetingConfiguration {
     List<Pattern> chatPattern;
     List<Pattern> joinPattern;
     List<Pattern> leavePattern;
+    List<Pattern> welcomePattern;
 }

@@ -19,7 +19,8 @@ public class ChatMessageTokenizer {
     public static ChatMessage tokenizeChatMessage(String fullLine, GreetingConfiguration config) {
         return match(fullLine, config.getChatPattern(), ChatMessage.MessageType.CHAT).orElseGet(() ->
                 match(fullLine, config.getJoinPattern(), ChatMessage.MessageType.JOIN).orElseGet(() ->
-                        match(fullLine, config.getLeavePattern(), ChatMessage.MessageType.LEAVE).orElseGet(() -> createErrorMessage(fullLine, config))));
+                        match(fullLine, config.getWelcomePattern(), ChatMessage.MessageType.WELCOME).orElseGet(() ->
+                        match(fullLine, config.getLeavePattern(), ChatMessage.MessageType.LEAVE).orElseGet(() -> createErrorMessage(fullLine, config)))));
     }
 
     private static ChatMessage createErrorMessage(String fullLine, GreetingConfiguration configuration) {

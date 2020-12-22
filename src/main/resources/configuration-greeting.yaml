@@ -39,6 +39,22 @@ greeting:
     - ":D"
     - "(:"
     - "^_^"
+    - "=D"
+    - "=)"
+    - "(="
+    - "=]"
+    - ":]"
+    - "[:"
+    - "（*＾-＾*）"
+    - "(*^_^*)"
+    - "(•_•)"
+    - "( ﾉ ﾟｰﾟ)ﾉ"
+welcome:
+  messages:
+    - "Willkommen %s"
+    - "Willkommen %s!"
+    - "Herzlich Willkommen %s"
+    - "Herzlich Willkommen %s!"
 reconnect:
   cooldown:
     seconds: 300
@@ -57,4 +73,6 @@ pattern:
   leave:
     - "(.*) left the game"
     - "\\[\\-\\] (.*)"
+  welcome:
+    - ".* Willkommen > Wir begr.*en (.*) zum ersten Mal auf .*!"
 show-errors: false

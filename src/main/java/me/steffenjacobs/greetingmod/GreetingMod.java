@@ -53,11 +53,13 @@ public class GreetingMod {
                     configuration);
             if (message.getMessageType() == ChatMessage.MessageType.CHAT && isNotSentByCurrentPlayer(message) && LocalDateTime.now().isAfter(lastGoodbye.plusSeconds(configuration.getGoodbyeCooldownSeconds()))) {
                 if (configuration.getGoodbyesLowerCase().contains(message.getMessage().toLowerCase())) {
-                    sendRandomMessageForPlayer(configuration.getGoodbyes(), message.getPlayerName());
+                    sendRandomMessageForPlayer(configuration.getGoodbyes(), message.getPlayerName(), configuration.getGreetingsEmoticons());
                     lastGoodbye = LocalDateTime.now();
                 }
             } else if (message.getMessageType() == ChatMessage.MessageType.JOIN && isNotSentByCurrentPlayer(message)) {
                 handleJoinMessage(message);
+            } else if (message.getMessageType() == ChatMessage.MessageType.WELCOME && isNotSentByCurrentPlayer(message)) {
+                sendRandomMessageForPlayer(configuration.getWelcomes(), message.getPlayerName(), configuration.getGreetingsEmoticons());
             } else if (message.getMessageType() == ChatMessage.MessageType.LEAVE && isNotSentByCurrentPlayer(message)) {
                 USER_LEFT_CACHE.put(message.getPlayerName(), LocalDateTime.now());
             }
@@ -75,9 +77,9 @@ public class GreetingMod {
     private void handleJoinMessage(ChatMessage message) {
         LocalDateTime leaveTime = USER_LEFT_CACHE.remove(message.getPlayerName());
         if (leaveTime == null || leaveTime.isBefore(LocalDateTime.now().minusSeconds(configuration.getReconnectCooldownSeconds()))) {
-            sendRandomMessageForPlayer(configuration.getGreetings(), message.getPlayerName());
+            sendRandomMessageForPlayer(configuration.getGreetings(), message.getPlayerName(), configuration.getGreetingsEmoticons());
         } else if (leaveTime.isBefore(LocalDateTime.now().minusSeconds(configuration.getReconnectWelcomeBackCooldownSeconds()))) {
-            sendRandomMessageForPlayer(configuration.getWelcomeBacks(), message.getPlayerName());
+            sendRandomMessageForPlayer(configuration.getWelcomeBacks(), message.getPlayerName(), configuration.getGreetingsEmoticons());
         }
     }
 

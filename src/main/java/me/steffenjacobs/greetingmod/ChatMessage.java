@@ -9,7 +9,7 @@ import lombok.Value;
 public class ChatMessage {
 
     public enum MessageType{
-        JOIN, CHAT, LEAVE
+        JOIN, CHAT, LEAVE, WELCOME
     }
 
     String playerName;

@@ -16,6 +16,11 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Predicate;
 
 import static me.steffenjacobs.greetingmod.util.MessageSenderUtil.sendRandomMessageForPlayer;
 
@@ -23,18 +28,22 @@ import static me.steffenjacobs.greetingmod.util.MessageSenderUtil.sendRandomMess
 @Mod.EventBusSubscriber(value = Dist.CLIENT)
 public class GreetingMod {
 
-    private static final LruCache<String, LocalDateTime> USER_LEFT_CACHE = new LruCache<>(16);
+    private static final Map<String, LocalDateTime> USER_LEFT_CACHE = Collections.synchronizedMap(new LruCache<>(16));
 
     private final GreetingConfiguration configuration;
     private LocalDateTime lastGoodbye = LocalDateTime.now().minusHours(1);
+    private final List<Predicate<ChatMessage>> messageStrategies;
+
 
     public GreetingMod() {
         MinecraftForge.EVENT_BUS.register(this);
         configuration = new ConfigManager().load();
+        messageStrategies = Arrays.asList(this::handleGoodbyeMessage, this::handleJoinMessage,
+                this::handleWelcomeMessage, this::handleLeaveMessage);
     }
 
     @SubscribeEvent
-    public void onTick(TickEvent.ClientTickEvent event){
+    public void onTick(TickEvent.ClientTickEvent event) {
         Scheduler.instance().tick();
     }
 
@@ -51,17 +60,11 @@ public class GreetingMod {
         if (!Minecraft.getInstance().player.getUniqueID().equals(event.getSenderUUID())) {
             ChatMessage message = ChatMessageTokenizer.tokenizeChatMessage(event.getMessage().getString(),
                     configuration);
-            if (message.getMessageType() == ChatMessage.MessageType.CHAT && isNotSentByCurrentPlayer(message) && LocalDateTime.now().isAfter(lastGoodbye.plusSeconds(configuration.getGoodbyeCooldownSeconds()))) {
-                if (configuration.getGoodbyesLowerCase().contains(message.getMessage().toLowerCase())) {
-                    sendRandomMessageForPlayer(configuration.getGoodbyes(), message.getPlayerName(), configuration.getGreetingsEmoticons());
-                    lastGoodbye = LocalDateTime.now();
+
+            for (Predicate<ChatMessage> strategy : messageStrategies) {
+                if (strategy.test(message)) {
+                    break;
                 }
-            } else if (message.getMessageType() == ChatMessage.MessageType.JOIN && isNotSentByCurrentPlayer(message)) {
-                handleJoinMessage(message);
-            } else if (message.getMessageType() == ChatMessage.MessageType.WELCOME && isNotSentByCurrentPlayer(message)) {
-                sendRandomMessageForPlayer(configuration.getWelcomes(), message.getPlayerName(), configuration.getGreetingsEmoticons());
-            } else if (message.getMessageType() == ChatMessage.MessageType.LEAVE && isNotSentByCurrentPlayer(message)) {
-                USER_LEFT_CACHE.put(message.getPlayerName(), LocalDateTime.now());
             }
         } else {
             //Check if current player said goodbye -> Avoid second message on answers from other players
@@ -74,13 +77,77 @@ public class GreetingMod {
 
     }
 
-    private void handleJoinMessage(ChatMessage message) {
-        LocalDateTime leaveTime = USER_LEFT_CACHE.remove(message.getPlayerName());
-        if (leaveTime == null || leaveTime.isBefore(LocalDateTime.now().minusSeconds(configuration.getReconnectCooldownSeconds()))) {
-            sendRandomMessageForPlayer(configuration.getGreetings(), message.getPlayerName(), configuration.getGreetingsEmoticons());
-        } else if (leaveTime.isBefore(LocalDateTime.now().minusSeconds(configuration.getReconnectWelcomeBackCooldownSeconds()))) {
-            sendRandomMessageForPlayer(configuration.getWelcomeBacks(), message.getPlayerName(), configuration.getGreetingsEmoticons());
+    /**
+     * e.g. 'Dev left.'
+     * <p>
+     * Given: Message was identified as LEAVE message AND message was not sent by current player
+     * Then: add user to leave-cache
+     */
+    private boolean handleLeaveMessage(ChatMessage message) {
+        if (message.getMessageType() == ChatMessage.MessageType.LEAVE && isNotSentByCurrentPlayer(message)) {
+            USER_LEFT_CACHE.put(message.getPlayerName(), LocalDateTime.now());
+            return true;
         }
+        return false;
+    }
+
+    /**
+     * e.g. '[Server]: We welcome Dev to our server.'
+     * <p>
+     * Given: Message was identified as WELCOME message AND message was not sent by current player
+     * Then: say hello
+     */
+    private boolean handleWelcomeMessage(ChatMessage message) {
+        if (message.getMessageType() == ChatMessage.MessageType.WELCOME && isNotSentByCurrentPlayer(message)) {
+            sendRandomMessageForPlayer(configuration.getWelcomes(), message.getPlayerName(),
+                    configuration.getGreetingsEmoticons(), USER_LEFT_CACHE::containsKey, true);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * e.g. 'Byebye'
+     * <p>
+     * Given: Message was identified as CHAT message AND message was not sent by current player AND there was not
+     * just a goodbye message in chat
+     * Case: Message can be identified as goodbye message: say goodbye as well
+     */
+    private boolean handleGoodbyeMessage(ChatMessage message) {
+        if (message.getMessageType() == ChatMessage.MessageType.CHAT
+                && isNotSentByCurrentPlayer(message)
+                && LocalDateTime.now().isAfter(lastGoodbye.plusSeconds(configuration.getGoodbyeCooldownSeconds()))
+                && configuration.getGoodbyesLowerCase().contains(message.getMessage().toLowerCase())) {
+            sendRandomMessageForPlayer(configuration.getGoodbyes(), message.getPlayerName(),
+                    configuration.getGreetingsEmoticons());
+            lastGoodbye = LocalDateTime.now();
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * e.g. 'Dev joined the game.'
+     * <p>
+     * Given: Message was identified as JOIN message AND message was not sent by current player
+     * Case 1: Involved player was not found in leave-cache or reconnect cooldown expired: greet player
+     * Case 2: Involved player left and reconnect cooldown expired but welcome back cooldown did not expire yet:
+     * welcome-back player
+     */
+    private boolean handleJoinMessage(ChatMessage message) {
+        if (message.getMessageType() == ChatMessage.MessageType.JOIN && isNotSentByCurrentPlayer(message)) {
+            LocalDateTime leaveTime = USER_LEFT_CACHE.remove(message.getPlayerName());
+            if (leaveTime == null || leaveTime.isBefore(LocalDateTime.now().minusSeconds(configuration.getReconnectCooldownSeconds()))) {
+                sendRandomMessageForPlayer(configuration.getGreetings(), message.getPlayerName(),
+                        configuration.getGreetingsEmoticons(), USER_LEFT_CACHE::containsKey, true);
+                return true;
+            } else if (leaveTime.isBefore(LocalDateTime.now().minusSeconds(configuration.getReconnectWelcomeBackCooldownSeconds()))) {
+                sendRandomMessageForPlayer(configuration.getWelcomeBacks(), message.getPlayerName(),
+                        configuration.getGreetingsEmoticons(), USER_LEFT_CACHE::containsKey, true);
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean isNotSentByCurrentPlayer(ChatMessage message) {

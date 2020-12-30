@@ -4,10 +4,8 @@ import lombok.experimental.UtilityClass;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.text.StringTextComponent;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
+import java.util.function.Predicate;
 
 @UtilityClass
 public class MessageSenderUtil {
@@ -25,10 +23,16 @@ public class MessageSenderUtil {
     }
 
     public static void sendRandomMessageForPlayer(List<String> messages, String playerName) {
-        sendRandomMessageForPlayer(messages, playerName, Arrays.asList(""));
+        sendRandomMessageForPlayer(messages, playerName, Collections.singletonList(""));
     }
 
-    public static void sendRandomMessageForPlayer(List<String> messages, String playerName, List<String> suffixes) {
+    public static void sendRandomMessageForPlayer(List<String> messages, String playerName, List<String> suffixes,
+                                                  Predicate<String> condition, boolean negateCondition) {
+        sendRandomMessageForPlayer(messages, playerName, suffixes, negateCondition ? condition.negate() : condition);
+    }
+
+    public static void sendRandomMessageForPlayer(List<String> messages, String playerName, List<String> suffixes,
+                                                  Predicate<String> condition) {
         String template = getRandomFromList(messages);
 
         //Lower case template (randomly)
@@ -42,8 +46,16 @@ public class MessageSenderUtil {
         //use suffix (randomly)
         String fullMessage = realizeFormatRandomly(innerMessage, getRandomFromList(suffixes), MESSAGE_FORMAT);
 
-        Scheduler.instance().schedule(() -> Minecraft.getInstance().player.sendChatMessage(fullMessage),
-                CHAT_DELAY_MINIMUM_TICKS + fullMessage.length() * CHAT_DELAY_MESSAGE_LENGTH_MULTIPLICATOR + random.nextInt(CHAT_DELAY_RANDOM_TICK_MAX));
+        Scheduler.instance().schedule(() -> {
+            if (condition.test(playerName)) {
+                Minecraft.getInstance().player.sendChatMessage(fullMessage);
+            }
+        }, CHAT_DELAY_MINIMUM_TICKS + fullMessage.length() * CHAT_DELAY_MESSAGE_LENGTH_MULTIPLICATOR + random.nextInt(CHAT_DELAY_RANDOM_TICK_MAX));
+
+    }
+
+    public static void sendRandomMessageForPlayer(List<String> messages, String playerName, List<String> suffixes) {
+        sendRandomMessageForPlayer(messages, playerName, suffixes, p -> true);
     }
 
     private static String getRandomFromList(List<String> suffixes) {

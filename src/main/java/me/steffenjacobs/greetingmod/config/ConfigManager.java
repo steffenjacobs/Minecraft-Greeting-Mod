@@ -1,5 +1,7 @@
 package me.steffenjacobs.greetingmod.config;
 
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.InputStream;
@@ -8,6 +10,8 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+@NoArgsConstructor
+@AllArgsConstructor
 public class ConfigManager {
 
     private GreetingConfiguration config;

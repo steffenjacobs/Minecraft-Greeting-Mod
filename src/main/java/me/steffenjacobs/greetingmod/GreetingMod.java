@@ -26,20 +26,25 @@ import static me.steffenjacobs.greetingmod.util.MessageSenderUtil.sendRandomMess
 
 @Mod(value = "greetingmod")
 @Mod.EventBusSubscriber(value = Dist.CLIENT)
+
 public class GreetingMod {
 
     private static final Map<String, LocalDateTime> USER_LEFT_CACHE = Collections.synchronizedMap(new LruCache<>(16));
 
     private final GreetingConfiguration configuration;
-    private LocalDateTime lastGoodbye = LocalDateTime.now().minusHours(1);
+    LocalDateTime lastGoodbye = LocalDateTime.now().minusHours(1);
     private final List<Predicate<ChatMessage>> messageStrategies;
 
 
     public GreetingMod() {
-        MinecraftForge.EVENT_BUS.register(this);
-        configuration = new ConfigManager().load();
+        this(new ConfigManager().load());
+    }
+
+    public GreetingMod(GreetingConfiguration configuration) {
+        this.configuration = configuration;
         messageStrategies = Arrays.asList(this::handleGoodbyeMessage, this::handleJoinMessage,
                 this::handleWelcomeMessage, this::handleLeaveMessage);
+        MinecraftForge.EVENT_BUS.register(this);
     }
 
     @SubscribeEvent

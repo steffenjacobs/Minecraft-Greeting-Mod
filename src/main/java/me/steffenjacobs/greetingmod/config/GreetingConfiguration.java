@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 @Value
-@Builder
+@Builder(toBuilder = true)
 public class GreetingConfiguration {
     boolean showErrors;
 
